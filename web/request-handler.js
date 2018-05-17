@@ -1,21 +1,22 @@
 var path = require('path');
 var archive = require('../helpers/archive-helpers');
 var fs = require('fs');
+var http = require('../web/http-helpers');
 // require more modules/folders here!
-var defaultCorsHeaders = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
-};
-
 exports.handleRequest = function (req, res) {
-  headers = defaultCorsHeaders;
+  headers = http.headers;
   if(req.url === '/'){
-    fs.readFile('../web/public/index.html', function(data){
-      headers['content-type'] = 'text/html';
+    fs.readFile('./web/public/index.html', function(err, data){
+      if (err) {throw err;}
       res.writeHead(200, headers);
-      res.end(data.toString());
+      res.end(data);
+    });
+  } else if (req.url === '/styles.css'){
+    fs.readFile('./web/public/styles.css', function(err, data){
+      if(err){throw err;}
+      headers['Content-Type'] = 'text/css';
+      res.writeHead(200, headers);
+      res.end(data);
     });
   }
   //res.end(archive.paths.list);
