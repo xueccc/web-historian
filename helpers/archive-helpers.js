@@ -34,27 +34,21 @@ exports.readListOfUrls = function(callback) {
 };
 
 exports.isUrlInList = function(url, callback) {
-  var result;
-  return fs.readFile(exports.path.list, (err, data) => {
-    var newData = data.toString().split('\n');
-    result = newData.includes(url);
-    console.log('inner function');
-    return callback(result);
+
+  exports.readListOfUrls((listURLS) => {
+    var exists = listURLS.includes(url);
+    callback(exists);
   });
-  //return result;
-  // return exports.readListofUrls((err, listURLS) => {
-  //   console.log('listURLS');
-  //   var exists = listURLS.includes(url);
-  //   callback(exists);
-  // });
 };
 
 exports.addUrlToList = function(url, callback) {
-  
-  var fd = fs.openSync(exports.paths.list, 'w');
-  fs.writeFileSync(fd, url.join('\n'));
-  fs.closeSync(fd);
-  callback();
+  fs.open(exports.paths.list, 'a', (err, fd) => {
+    fs.write(fd, url, () =>{
+      fs.close(fd, () => {
+        callback(true);
+      });     
+    });
+  });
 };
 
 exports.isUrlArchived = function(url, callback) {
