@@ -35,9 +35,10 @@ exports.readListOfUrls = function(callback) {
 
 exports.isUrlInList = function(url, callback) {
   var result;
-  fs.readFile(exports.path.list, (err, data) => {
+  return fs.readFile(exports.path.list, (err, data) => {
     var newData = data.toString().split('\n');
     result = newData.includes(url);
+    console.log('inner function');
     return callback(result);
   });
   //return result;
@@ -49,6 +50,11 @@ exports.isUrlInList = function(url, callback) {
 };
 
 exports.addUrlToList = function(url, callback) {
+  
+  var fd = fs.openSync(exports.paths.list, 'w');
+  fs.writeFileSync(fd, url.join('\n'));
+  fs.closeSync(fd);
+  callback();
 };
 
 exports.isUrlArchived = function(url, callback) {
