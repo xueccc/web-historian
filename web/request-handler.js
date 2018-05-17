@@ -2,6 +2,7 @@ var path = require('path');
 var archive = require('../helpers/archive-helpers');
 var fs = require('fs');
 var http = require('../web/http-helpers');
+var _ = require('underscore');
 // require more modules/folders here!
 exports.handleRequest = function (req, res) {
   console.log(req.url);
@@ -42,12 +43,14 @@ exports.handleRequest = function (req, res) {
     req.on('error', (err) => {
       console.error(err);
       res.writeHead(500, headers); 
-      res.end(JSON.stringify(resultObj));
+      res.end();
     }).on('data', (chunk) => {
       body.push(chunk);
     }).on('end', () => {
-      body = JSON.parse(Buffer.concat(body).toString()); 
-      archive.addUrlToList(body, ()=> {
+      body = Buffer.concat(body).toString();
+      body = body.slice(4);
+      console.log(body);
+      archive.addUrlToList(body + '\n', ()=> {
         res.writeHead(302, headers);
         res.end();
       });
