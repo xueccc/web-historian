@@ -64,6 +64,9 @@ exports.isUrlArchived = function(url, callback) {
 
 exports.downloadUrls = function(urls) {
   for (var i = 0; i < urls.length; i++) {
+    if (urls[i] === '') {
+      return;
+    }
     http.get('http://' + urls[i] + '/', (res) => {
       fs.open(exports.paths.archivedSites + '/' + res.socket._host, 'w', (err, fd) =>{
         let data = '';
@@ -77,7 +80,7 @@ exports.downloadUrls = function(urls) {
       });
     });
   }
-  //fs.writeFile(exports.paths.list, '');
+  fs.writeFile(exports.paths.list, '');
 };
 
 
