@@ -44,7 +44,7 @@ exports.isUrlInList = function(url, callback) {
 
 exports.addUrlToList = function(url, callback) {
   fs.open(exports.paths.list, 'a', (err, fd) => {
-    fs.write(fd, url, () =>{
+    fs.write(fd, url + '\n', () =>{
       fs.close(fd, () => {
         callback(true);
       });     
@@ -54,16 +54,30 @@ exports.addUrlToList = function(url, callback) {
 
 exports.isUrlArchived = function(url, callback) {
   return fs.access(exports.paths.archivedSites + '/' + url, (err) => {
-    if(err){
+    if (err) {
       callback(false);
-    }else{
+    } else {
       callback(true);
     }
   });
 };
 
 exports.downloadUrls = function(urls) {
-  for(var i = 0; i < urls.length; i++){
-    
+  for (var i = 0; i < urls.length; i++) {
+    http.get('http://' + urls[i] + '/', (res) => {
+      fs.open(exports.paths.archivedSites + '/' + res.socket._host, 'w', (err, fd) =>{
+        let data = '';
+        res.on('data', (chunk)=>{
+          data += chunk;
+        }).on('end', ()=>{
+          fs.write(fd, data, () =>{
+            fs.close(fd);
+          });
+        });
+      });
+    });
   }
+  //fs.writeFile(exports.paths.list, '');
 };
+
+

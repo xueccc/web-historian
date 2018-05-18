@@ -3,10 +3,15 @@ var archive = require('../helpers/archive-helpers');
 var fs = require('fs');
 var http = require('../web/http-helpers');
 var _ = require('underscore');
+var archiveHelpers = require('../workers/htmlfetcher');
 // require more modules/folders here!
 exports.handleRequest = function (req, res) {
   console.log(req.url);
+  console.log(req.method);
   headers = http.headers;
+  console.log(headers);
+  archiveHelpers.archiveHelpers();
+  
   if (req.url === '/' && req.method === 'GET') {
     fs.readFile('./web/public/index.html', function(err, data) {
       if (err) { throw err; }
@@ -16,8 +21,10 @@ exports.handleRequest = function (req, res) {
   } else if (req.url === '/styles.css') {
     fs.readFile('./web/public/styles.css', function(err, data) {
       if (err) { throw err; }
-      headers['Content-Type'] = 'text/css';
-      res.writeHead(200, headers);
+      var newHeaders = headers;
+      console.log(headers);
+      newHeaders['Content-Type'] = 'text/css';
+      res.writeHead(200, newHeaders);
       res.end(data);
     });
   } else if (req.method === 'GET') {
@@ -50,9 +57,19 @@ exports.handleRequest = function (req, res) {
       body = Buffer.concat(body).toString();
       body = body.slice(4);
       console.log(body);
-      archive.addUrlToList(body + '\n', ()=> {
-        res.writeHead(302, headers);
-        res.end();
+      archive.isUrlArchived(body, (exist)=>{
+        if (!exist) {
+          archive.addUrlToList(body + '\n', ()=> {
+            res.writeHead(302, headers);
+            res.end();
+          });
+        } else {
+          fs.readFile(archive.paths.archivedSites + '/' + body, function(err, data) {
+            if (err) { throw err; }
+            res.writeHead(200, headers);
+            res.end(data);
+          });
+        }
       });
     });
   }
